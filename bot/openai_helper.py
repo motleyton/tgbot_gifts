@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+from typing import List
 
 from openai import OpenAI
 
@@ -57,20 +58,32 @@ class OpenAIClient:
         ]
         return messages
 
-    def get_response(self, prompt: str) -> str:
-
+    def get_response(self, prompt: str) -> List[str]:
         messages = self._create_prompt(prompt)
+        responses = []  # Инициализация списка для хранения ответов
+
         try:
             chat_completion = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
             )
-            # Изменение доступа к тексту ответа на использование атрибута 'content'
+
+            # Предполагаем, что модель возвращает один длинный текст
             if chat_completion.choices:
-                return chat_completion.choices[0].message.content
-            else:
-                return "Извините, не удалось получить ответ."
+                full_response = chat_completion.choices[0].message.content  # Берём первый ответ
+
+                # Разделяем ответ на отдельные рекомендации
+                # Здесь предполагается, что каждая рекомендация отделена паттерном "\n\n"
+                individual_responses = full_response.split("\n\n")
+
+                # Фильтрация пустых строк и добавление в список ответов
+                responses = [response.strip() for response in individual_responses if response.strip()]
+
+            return responses if responses else ["Извините, не удалось получить ответ."]
+
         except Exception as e:
             logger.error(f"Ошибка при выполнении запроса к GPT: {e}")
-            return "Произошла ошибка при обработке вашего запроса."
+            return ["Произошла ошибка при обработке вашего запроса."]
+
+
 
