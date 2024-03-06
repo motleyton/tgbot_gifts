@@ -3,19 +3,16 @@ import logging
 import traceback
 
 from telegram import Message, MessageEntity, Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, CallbackContext
 
 
-async def error_handler(_: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Handles errors in the telegram-python-bot library.
-    """
-    # Логирование содержимого обновления
-    if context.update:
-        logging.error(f"Update that caused the error: {context.update}")
+async def error_handler(self, update: Update, context: CallbackContext, error_message: str):
+    # Логгирование ошибки для отладки
+    print(f"Произошла ошибка: {error_message}")
 
-    # Логирование стектрейса
-    logging.error(f"Exception while handling an update: {context.error}\n{traceback.format_exc()}")
+    # Отправка сообщения с извинениями и перезапуск команды start
+    await update.message.reply_text("Извините, произошла ошибка. Попробуем начать сначала.")
+    await self.start(update, context)
 
 def message_text(message: Message) -> str:
     """
