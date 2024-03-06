@@ -66,6 +66,7 @@ class OpenAIClient:
             chat_completion = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
+                temperature=self.temperature,
             )
 
             # Предполагаем, что модель возвращает один длинный текст

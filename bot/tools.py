@@ -1,7 +1,6 @@
-from langchain.tools import BaseTool
 import re
 from googleapiclient.discovery import build
-from typing import List, Any
+from typing import List
 
 class GoogleSearchTool():
     name = "Google Search Tool"
@@ -19,10 +18,12 @@ class GoogleSearchTool():
 
     def parse_gpt_response(self, response_texts: List[str]) -> List[str]:
         search_queries = []
+
         for response_text in response_texts:
             # Удаление номера перед идеей, если они есть, для чистоты извлечения названий
             clean_text = re.sub(r'^\d+\.\s*', '', response_text)
-            match = re.match(r'^(.*?)(?:\.|\Z)', clean_text)
+            # Изменение: поиск текста до первого двоеточия
+            match = re.match(r'^(.*?):', clean_text)
             if match:
                 query = match.group(1).strip()
                 # Добавляем в список только непустые строки
